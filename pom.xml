@@ -541,7 +541,7 @@
             <dependency>
                 <groupId>com.adobe.aem</groupId>
                 <artifactId>aem-sdk-api</artifactId>
-                <version>2020.7.3902.20200716T022312Z-200604</version>
+                <version>2023.11.14227.20231108T162349Z-231000</version>
                 <scope>provided</scope>
             </dependency>
 
