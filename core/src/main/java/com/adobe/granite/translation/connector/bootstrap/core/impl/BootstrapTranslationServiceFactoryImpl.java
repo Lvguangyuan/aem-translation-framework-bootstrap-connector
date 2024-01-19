@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -63,6 +64,9 @@ public class BootstrapTranslationServiceFactoryImpl implements TranslationServic
 
 	@Reference
 	BootstrapTmsService bootstrapTmsService;
+
+	@Reference
+	private ResourceResolverFactory resourceResolverFactory;
 
 	private List<TranslationMethod> supportedTranslationMethods;
 
@@ -114,7 +118,7 @@ public class BootstrapTranslationServiceFactoryImpl implements TranslationServic
 		Map<String, String> availableCategoryMap = new HashMap<String, String>();
 		return new BootstrapTranslationServiceImpl(availableLanguageMap, availableCategoryMap, factoryName,
 				isPreviewEnabled, isPseudoLocalizationDisabled, exportFormat, dummyConfigId, dummyServerUrl,
-				previewPath, translationConfig, bootstrapTmsService);
+				previewPath, translationConfig, bootstrapTmsService, resourceResolverFactory);
 	}
 
 	@Override
