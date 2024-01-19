@@ -58,6 +58,10 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
         <!-- OSGi Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>

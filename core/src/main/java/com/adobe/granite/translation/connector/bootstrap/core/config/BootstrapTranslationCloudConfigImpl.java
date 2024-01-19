@@ -11,7 +11,7 @@ written permission of Adobe.
 *************************************************************************
  */
 
-package com.adobe.granite.translation.connector.bootstrap.core.impl.config;
+package com.adobe.granite.translation.connector.bootstrap.core.config;
 
 import com.adobe.granite.translation.api.TranslationException;
 import com.adobe.granite.translation.connector.bootstrap.core.BootstrapTranslationCloudConfig;

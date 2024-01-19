@@ -21,6 +21,7 @@ public interface BootstrapTranslationCloudConfig {
 
     public static final String RESOURCE_TYPE = "cq/translation/components/mt-cloudconfig";
     public static final String ROOT_PATH = "/etc/cloudservices/bootstrap-translation";
+//    public static final String ROOT_PATH = "/conf/Translate-Demo/settings/cloudconfigs/translation/bootstrap-translation";
 
     String getDummyServerUrl();
 

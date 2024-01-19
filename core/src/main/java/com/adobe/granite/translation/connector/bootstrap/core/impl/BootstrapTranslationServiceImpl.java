@@ -20,7 +20,9 @@ import com.adobe.granite.translation.api.TranslationConstants.TranslationMethod;
 import com.adobe.granite.translation.api.TranslationConstants.TranslationStatus;
 import com.adobe.granite.translation.bootstrap.tms.core.BootstrapTmsConstants;
 import com.adobe.granite.translation.bootstrap.tms.core.BootstrapTmsService;
-import com.adobe.granite.translation.connector.bootstrap.core.impl.config.BootstrapTranslationCloudConfigImpl;
+import com.adobe.granite.translation.connector.bootstrap.core.BootstrapConnectorClient;
+import com.adobe.granite.translation.connector.bootstrap.core.BootstrapConstants;
+import com.adobe.granite.translation.connector.bootstrap.core.config.BootstrapTranslationCloudConfigImpl;
 import com.adobe.granite.translation.core.common.AbstractTranslationService;
 import com.adobe.granite.translation.core.common.TranslationResultImpl;
 import org.apache.sling.api.resource.LoginException;
@@ -54,6 +56,7 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
     private String exportFormat = BootstrapConstants.EXPORT_FORMAT_XML;
     private BootstrapTmsService bootstrapTmsService;
     private ResourceResolverFactory resourceResolverFactory;
+    private BootstrapConnectorClient connectorClient;
     private final static String BOOTSTRAP_SERVICE = "bootstrap-service";
 
     class TranslationJobDetails {
@@ -110,7 +113,7 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
                                            String dummyServerUrl, String previewPath, TranslationConfig translationConfig,
                                            BootstrapTmsService bootstrapTmsService, ResourceResolverFactory resourceResolverFactory) {
         super(availableLanguageMap, availableCategoryMap, name, SERVICE_LABEL, SERVICE_ATTRIBUTION,
-            BootstrapTranslationCloudConfigImpl.ROOT_PATH, TranslationMethod.MACHINE_TRANSLATION, translationConfig);
+                BootstrapTranslationCloudConfigImpl.ROOT_PATH, TranslationMethod.MACHINE_TRANSLATION, translationConfig);
 
         log.trace("BootstrapTranslationServiceImpl.");
         log.trace("dummyConfigId: {}", dummyConfigId);
@@ -127,6 +130,7 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         this.isPreviewEnabled = isPreviewEnabled;
         this.exportFormat = exportFormat;
         this.resourceResolverFactory = resourceResolverFactory;
+        this.connectorClient = new BootstrapConnectorClientImpl();
     }
 
     private ResourceResolver getResourceResolver() {
@@ -279,7 +283,10 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         log.debug("Status for Job {} is {}", strTranslationJobID, status);
 
         if ("SCOPE_REQUESTED".equals(status)) {
-            return TranslationStatus.fromString("SCOPE_COMPLETED");
+            String scopeStatus = connectorClient.getScopeStatus();
+            if ("done".equals(scopeStatus)) {
+                return TranslationStatus.fromString("SCOPE_COMPLETED");
+            }
         }
 
         return TranslationStatus.fromString(status);

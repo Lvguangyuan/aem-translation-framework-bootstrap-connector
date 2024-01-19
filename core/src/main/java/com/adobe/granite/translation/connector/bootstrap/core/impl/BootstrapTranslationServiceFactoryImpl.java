@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.adobe.granite.translation.connector.bootstrap.core.BootstrapServiceConfiguration;
+import com.adobe.granite.translation.connector.bootstrap.core.BootstrapTranslationCloudConfig;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -35,14 +37,13 @@ import com.adobe.granite.translation.api.TranslationException;
 import com.adobe.granite.translation.api.TranslationService;
 import com.adobe.granite.translation.api.TranslationServiceFactory;
 import com.adobe.granite.translation.bootstrap.tms.core.BootstrapTmsService;
-import com.adobe.granite.translation.connector.bootstrap.core.BootstrapTranslationCloudConfig;
 import com.adobe.granite.translation.core.TranslationCloudConfigUtil;
 
 @Component(service = TranslationServiceFactory.class, immediate = true, configurationPid = "com.adobe.granite.translation.connector.bootstrap.core.impl.BootstrapTranslationServiceFactoryImpl", property = {
 		Constants.SERVICE_DESCRIPTION + "=Configurable settings for the Bootstrap Translation connector",
 		"label" + "=Bootstrap Translation Connector Factory" })
 
-@Designate(ocd=BootstrapServiceConfiguration.class)
+@Designate(ocd= BootstrapServiceConfiguration.class)
 public class BootstrapTranslationServiceFactoryImpl implements TranslationServiceFactory {
 
 	protected String factoryName;

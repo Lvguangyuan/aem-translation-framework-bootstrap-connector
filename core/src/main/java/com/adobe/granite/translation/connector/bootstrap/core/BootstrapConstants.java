@@ -1,4 +1,4 @@
-package com.adobe.granite.translation.connector.bootstrap.core.impl;
+package com.adobe.granite.translation.connector.bootstrap.core;
 
 // TODO: Auto-generated Javadoc
 /**
