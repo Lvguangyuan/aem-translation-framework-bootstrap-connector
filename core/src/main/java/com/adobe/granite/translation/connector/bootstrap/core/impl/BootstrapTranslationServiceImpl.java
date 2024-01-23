@@ -283,10 +283,10 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         log.debug("Status for Job {} is {}", strTranslationJobID, status);
 
         if ("SCOPE_REQUESTED".equals(status)) {
-            String scopeStatus = connectorClient.getScopeStatus();
-            if ("done".equals(scopeStatus)) {
-                return TranslationStatus.fromString("SCOPE_COMPLETED");
-            }
+//            return TranslationStatus.fromString("SCOPE_COMPLETED");
+//            String scopeStatus = connectorClient.getScopeStatus();
+//            if ("done".equals(scopeStatus)) {
+//            }
         }
 
         return TranslationStatus.fromString(status);

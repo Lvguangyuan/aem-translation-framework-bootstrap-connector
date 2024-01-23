@@ -49,9 +49,8 @@
     var pages="pages";
     var assets="assets";
 
+    console.log("debug........js loaded.")
 
-    alert("Just go ..");
-    
     var ui = $(window).adaptTo("foundation-ui");
 
     function showActionTaken(operationName, buttonClass){
@@ -192,6 +191,87 @@
 
     function isJobInProgress(buttonObj){
         return (buttonObj.getAttribute('data-translationstatus')=== "TRANSLATION_IN_PROGRESS");
+    }
+
+    function takeBootstrapAction(e, buttonClass, operationName, bRefresh, bCheckForTargetLanguage, waitDialog , successCallbackFn ) {
+        e.preventDefault();
+        if(bCheckForTargetLanguage && !isProjectTargetLanguageCorrect(e.currentTarget)){
+            ui.notify(Granite.I18n.get("Error"), Granite.I18n.get("Please set Project Target Language, and try again."), "error");
+            return;
+        }
+        if(waitDialog == null){
+            ui.wait();
+        }
+        var url = e.currentTarget.getAttribute('data-translationjobpath') + ".bootstrap.translate";
+        var translationJobPath = e.currentTarget.getAttribute('data-translationjobpath');
+        // var url = "/content/demo/us/en/_jcr_content.bootstrap.translate"
+
+        var data = {
+            ":operation" : operationName,
+            ":translationJobPath" : translationJobPath
+        };
+        if(customActionData!=null){
+            for(var index=0;index<customActionData.length;index++){
+                var obj = customActionData[index];
+                data[obj.name] = obj.value;
+            }
+        }
+        var strFeatureNotImplementedMessage = getFeatureNotImplementedString(buttonClass);
+
+        var ajaxOptions = {
+            url: url,
+            type: "post",
+            data: data,
+            complete: function(){
+                customActionData = null;
+                if(waitDialog == null){
+                    ui.clearWait();
+                }
+            },
+            success: function(data, status, request) {
+                var bFeatureImplemented = true;
+                var bSuccess = false;
+                var currentOperation = "";
+                var strErrorCode = "";
+                try{
+                    var jsonObj = JSON.parse(data);
+                    bFeatureImplemented = jsonObj.featureImplemented;
+                    bSuccess = jsonObj.success;
+                    if(!bSuccess){
+                        currentOperation = jsonObj.workflowOperation;
+                        strErrorCode = jsonObj.errorCode;
+                    }
+
+                }catch(e){bFeatureImplemented = true;}
+                if(bSuccess){
+                    if(bFeatureImplemented){
+                        if(bRefresh){
+                            showActionTaken(operationName, buttonClass);
+                        }
+                        if(successCallbackFn!=null){
+                            successCallbackFn(url);
+                        }
+                    }
+                    else{
+                        ui.notify(Granite.I18n.get("Error"), strFeatureNotImplementedMessage, "error");
+                    }
+                }
+                else{
+                    var strError = getWorkflowErrorString(currentOperation, strErrorCode);
+                    ui.notify(Granite.I18n.get("Error"), strError, "error");
+                    if(waitDialog != null){
+                        waitDialog.hide();
+                    }
+                }
+            },
+            error: function(jqXHR, message, error) {
+                if(waitDialog != null){
+                    waitDialog.hide();
+                }
+                ui.notify(Granite.I18n.get("Error"), Granite.I18n.get("Unable to take action"), "error");
+            }
+        };
+        $.ajax(ajaxOptions);
     }
 
     function takeAction(e, buttonClass, operationName, bRefresh, bCheckForTargetLanguage, waitDialog , successCallbackFn ) {
@@ -953,7 +1033,8 @@
 
     $(document).on("foundation-contentloaded", function(e) {
         $(startButton).off("click").on("click", function(e) {
-            takeAction(e, startButton, 'START_TRANSLATION', true, true, null);
+            // takeAction(e, startButton, 'START_TRANSLATION', true, true, null);
+            takeBootstrapAction(e, startButton, 'START_TRANSLATION', true, true, null);
         });
         $(cloneButton).off("click").on("click", function(e) {
             takeAction(e, cloneButton, 'CLONE_POD', true, true, null);
