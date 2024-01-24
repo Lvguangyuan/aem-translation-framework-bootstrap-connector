@@ -263,12 +263,17 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         } else if (strTranslationJobID == null) {
             log.debug("Job was never sent to TMS. Updated using Export/Import");
         } else {
-            bootstrapTmsService.setTmsProperty(strTranslationJobID, BootstrapTmsConstants.BOOTSTRAP_TMS_STATUS, state.getStatus().toString());
             log.warn("JOB ID is {}", strTranslationJobID);
-            if ("SCOPE_REQUESTED".equals(state.getStatus().toString())) {
+            if (state.getStatus() == TranslationStatus.SCOPE_REQUESTED) {
+                // TODO request scope here
 //                state.setStatus(TranslationStatus.SCOPE_COMPLETED);
-//                updateTranslationObjectState(strTranslationJobID, state);
+                log.trace("SCOPE_COMPLETED");
+            } else if (state.getStatus() == TranslationStatus.COMMITTED_FOR_TRANSLATION) {
+                // TODO approve scope here
+                state.setStatus(TranslationStatus.TRANSLATION_IN_PROGRESS);
+                log.trace("COMMITTED_FOR_TRANSLATION");
             }
+            bootstrapTmsService.setTmsProperty(strTranslationJobID, BootstrapTmsConstants.BOOTSTRAP_TMS_STATUS, state.getStatus().toString());
         }
         if (state.getStatus() == TranslationStatus.COMMITTED_FOR_TRANSLATION) {
             log.trace("Uploaded all Translation Objects in job {}", strTranslationJobID);
@@ -281,14 +286,11 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         log.trace("BootstrapTranslationServiceImpl.getTranslationJobStatus");
         String status = bootstrapTmsService.getTmsJobStatus(strTranslationJobID);
         log.debug("Status for Job {} is {}", strTranslationJobID, status);
-
-        if ("SCOPE_REQUESTED".equals(status)) {
-//            return TranslationStatus.fromString("SCOPE_COMPLETED");
-//            String scopeStatus = connectorClient.getScopeStatus();
-//            if ("done".equals(scopeStatus)) {
-//            }
+        if (status.equals("SCOPE_REQUESTED")) {
+            // TODO request scope here
+            log.trace("SCOPE_COMPLETED");
+            return TranslationStatus.fromString("SCOPE_COMPLETED");
         }
-
         return TranslationStatus.fromString(status);
     }
 
@@ -378,9 +380,13 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
         log.trace("BootstrapTranslationServiceImpl.updateTranslationObjectsState");
 
         TranslationStatus[] retStatus = new TranslationStatus[states.length];
+        TranslationState tempState;
         for (int index = 0; index < states.length; index++) {
-            retStatus[index] =
-                    updateTranslationObjectState(strTranslationJobID, translationObjects[index], states[index]);
+            tempState = states[index];
+            if (tempState.getStatus() == TranslationStatus.COMMITTED_FOR_TRANSLATION) {
+                tempState.setStatus(TranslationStatus.TRANSLATION_IN_PROGRESS);
+            }
+            retStatus[index] = updateTranslationObjectState(strTranslationJobID, translationObjects[index], tempState);
         }
         return retStatus;
     }
@@ -389,6 +395,8 @@ public class BootstrapTranslationServiceImpl extends AbstractTranslationService 
     public TranslationStatus[] getTranslationObjectsStatus(String strTranslationJobID,
                                                            TranslationObject[] translationObjects) throws TranslationException {
         log.trace("BootstrapTranslationServiceImpl.getTranslationObjectsStatus");
+
+
 
         TranslationStatus[] retStatus = new TranslationStatus[translationObjects.length];
         for (int index = 0; index < translationObjects.length; index++) {
